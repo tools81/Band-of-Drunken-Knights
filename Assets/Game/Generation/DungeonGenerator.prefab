@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8120654154570377786
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9115069641722340492}
+  - component: {fileID: 4882445617804618323}
+  m_Layer: 0
+  m_Name: DungeonGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &9115069641722340492
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8120654154570377786}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 70.87323, y: 68.636856, z: 36.590733}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4882445617804618323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8120654154570377786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cc617c894ce462439821e87909308be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Modules:
+  - {fileID: 958750242896067291, guid: b476c147a9256f8459183dea36fb085d, type: 3}
+  - {fileID: 4581237900432851506, guid: 1de9f8f81c71050478994961c99d96bb, type: 3}
+  - {fileID: 958750242896067291, guid: 38fcaac86662f644d85459844fcb1bd3, type: 3}
+  - {fileID: 4581237900432851506, guid: 39975d794a1804c46a303a872193d99c, type: 3}
+  - {fileID: 958750242896067291, guid: 290b2ecb396d4b743933f57d10ef208b, type: 3}
+  - {fileID: 4581237900432851506, guid: 86073d7aa00123440b4eee05116a62d8, type: 3}
+  - {fileID: 958750242896067291, guid: a5677eae6e313a64a9e5a5d05ee83e5c, type: 3}
+  - {fileID: 958750242896067291, guid: 6fe4a33f55fbd6b4dafe26dee97cada9, type: 3}
+  StartModule: {fileID: 958750242896067291, guid: 38fcaac86662f644d85459844fcb1bd3, type: 3}
+  Iterations: 3
