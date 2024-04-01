@@ -12,7 +12,11 @@ namespace Model.Generation
         [SerializeField]
         public bool IsDefault;
 
-        //[HideInInspector]
+        [Tooltip("Percent chance a module is instantiated at this connector. Values 0 to 1, ie 0.3 is 30%.")]
+        [SerializeField]
+        public float InstantiateChance = 1f;
+
+        [HideInInspector]
         public bool IsConnected;
 
         void OnDrawGizmos()

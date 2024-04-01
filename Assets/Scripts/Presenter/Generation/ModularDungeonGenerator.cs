@@ -4,8 +4,6 @@ using System.Linq;
 using UnityEngine;
 using Model.Generation;
 using Utility;
-using System;
-using UnityEngine.SceneManagement;
 
 namespace Presenter.Generation
 {
@@ -51,13 +49,13 @@ namespace Presenter.Generation
         public IEnumerator GenerateDungeon()
         {
             var startModule = Instantiate(StartModule, Vector3.zero, Quaternion.identity).GetComponent<Module>();
-            var pendingExits = new List<ModuleConnector>(startModule.GetExits());
+            var pendingExits = new List<ModuleConnector>(startModule.GetExitConnectors());
 
             for (int iteration = 0; iteration < Iterations; iteration++)
             {
                 var newExits = new List<ModuleConnector>();
 
-                foreach (var pendingExit in pendingExits)
+                foreach (var pendingExit in pendingExits.ToArray())
                 {                                        
                     StartCoroutine(GenerateModule(CommonModules, newExits, pendingExit));
                     if (slowGenerateSeconds > 0 ) { yield return new WaitForSeconds(slowGenerateSeconds); }
@@ -65,16 +63,6 @@ namespace Presenter.Generation
 
                 if (slowGenerateSeconds > 0) { yield return new WaitForSeconds(slowGenerateSeconds); }
                 pendingExits = newExits;
-
-                // try
-                // {
-                //     pendingExits = newExits;
-                // }
-                // catch (Exception ex)
-                // {
-                //     Debug.LogError($"Error: {ex.Message}");
-                //     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-                // }
             } 
 
             foreach(var exit in GameObject.FindGameObjectsWithTag("Exit"))
@@ -87,7 +75,6 @@ namespace Presenter.Generation
             }
 
             distDic.OrderByDescending(key => key.Value);
-            //var furthestExit = distDic.FirstOrDefault();
 
             foreach (ModuleConnector exit in distDic.Keys)
             {
@@ -102,8 +89,6 @@ namespace Presenter.Generation
                     break;
                 }
             }            
-
-            //distDic.Remove(furthestExit.Key);
 
             //Instantiate modules for unique rooms
             foreach(ModuleConnector exit in distDic.Keys)
@@ -140,13 +125,13 @@ namespace Presenter.Generation
                 newTag = RandomizationUtil.GetRandom(pendingExit.Tags);
             }
             
-            var newModulePrefab = GetRandomWithTag(modules, newTag);
+            var newModulePrefab = GenerationShared.GetRandomWithTag(modules, newTag);
             var moduleObject = Instantiate(newModulePrefab);
             var newModule = moduleObject.GetComponent<Module>();
 
-            var newModuleExits = newModule.GetExits();
+            var newModuleExits = newModule.GetExitConnectors();
             var exitToMatch = newModuleExits.FirstOrDefault(x => x.IsDefault) ?? RandomizationUtil.GetRandom(newModuleExits);
-            MatchExits(newModule, pendingExit, exitToMatch);
+            GenerationShared.MatchConnectors(newModule, pendingExit, exitToMatch);
             
             Physics.SyncTransforms();
 
@@ -165,9 +150,19 @@ namespace Presenter.Generation
 
                 newExits.AddRange(newModuleExits.Where(e => e != exitToMatch));
 
+                //Activate doorway frames between modules
                 foreach (Transform child in exitToMatch.transform)
                 {
-                    child.gameObject.SetActive(true);
+                    child.gameObject.SetActive(child.tag == "Doorway");
+                }
+                foreach (Transform child in pendingExit.transform)
+                {
+                    child.gameObject.SetActive(child.tag == "Doorway");
+                }
+
+                if (TryGetComponent(out DungeonPopulator populator))
+                {
+                    StartCoroutine(populator.PopulateDungeon(newModule));
                 }
             }
             else
@@ -200,30 +195,16 @@ namespace Presenter.Generation
                     CollisionRetries = 5;
                     pendingExit.IsConnected = newTag != "Boss";
                     Debug.Log($"Could not satisfy a collision. Leaving exit {pendingExit.gameObject.name}, {pendingExit.transform.parent.gameObject.name} empty.");
+
+                    //Remove door and activate wall to close off route
+                    foreach (Transform child in pendingExit.transform)
+                    {
+                        child.gameObject.SetActive(child.tag == "Wall");
+                    }
                 }
             }
 
             yield return null;
-        }
-
-        private void MatchExits(Module module, ModuleConnector oldExit, ModuleConnector newExit)
-        {            
-            var forwardVectorToMatch = -oldExit.transform.forward;
-            var correctiveRotation = Azimuth(forwardVectorToMatch) - Azimuth(newExit.transform.forward);
-            module.transform.RotateAround(newExit.transform.position, Vector3.up, correctiveRotation);
-            var correctiveTranslation = oldExit.transform.position - newExit.transform.position;
-            module.transform.position += correctiveTranslation; 
-        }
-
-        private static Module GetRandomWithTag(IEnumerable<Module> modules, string tagToMatch)
-        {
-            var matchingModules = modules.Where(m => m.Tags.Contains(tagToMatch)).ToArray();
-            return RandomizationUtil.GetRandom(matchingModules);
-        }
-
-        private static float Azimuth(Vector3 vector)
-        {
-            return Vector3.Angle(Vector3.forward, vector) * Mathf.Sign(vector.x);
         }
 
         private void DeleteAll()

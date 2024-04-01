@@ -10,5 +10,10 @@ namespace Utility
         {
             return array[Random.Range(0, array.Length)];
         }
+
+        public static bool GetRandom(float chance)
+        {
+            return Random.value <= chance;
+        }
     }
 }
