@@ -10,6 +10,34 @@ namespace Model.Generation
 
         [HideInInspector]
         public bool Colliding;
+        [HideInInspector]
+        public Bounds Bounds;
+        public LayerMask _layerMask;
+
+        private void FixedUpdate() 
+        {
+            if (_layerMask != gameObject.layer)
+            {
+                var shroudLayer = LayerMask.NameToLayer("Shroud");
+
+                if (gameObject.layer == shroudLayer)
+                {
+                    foreach (Transform child in gameObject.transform.GetComponentsInChildren<Transform>())
+                    {
+                        child.gameObject.layer = shroudLayer;
+                    }
+                }
+                else
+                {
+                    foreach (Transform child in gameObject.transform.GetComponentsInChildren<Transform>())
+                    {
+                        child.gameObject.layer = 0; //Default
+                    }
+                }
+            } 
+
+            _layerMask = gameObject.layer;
+        }
 
         public ModuleConnector[] GetConnectors()
         {

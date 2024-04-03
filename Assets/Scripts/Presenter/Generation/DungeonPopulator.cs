@@ -14,7 +14,7 @@ namespace Model.Generation
         [SerializeField]
         private Module[] _componentModules;
 
-        //Module parameter contains a dungeon module
+        //Module parameter contains a dungeon room module
         public IEnumerator PopulateDungeon(Module module)
         {
             var components = new List<ModuleConnector>(module.GetConnectors()).Where(m => m.tag == "Component");
@@ -24,19 +24,19 @@ namespace Model.Generation
                 //Percent chance that a component is generated at all
                 if (RandomizationUtil.GetRandom(component.InstantiateChance))
                 {
-                    StartCoroutine(GenerateModule(component));
+                    StartCoroutine(GenerateModule(component, module));
                 }
             }
 
             yield return null;
         }
 
-        private IEnumerator GenerateModule(ModuleConnector component)
+        private IEnumerator GenerateModule(ModuleConnector component, Module roomModule)
         {
             var newTag = RandomizationUtil.GetRandom(component.Tags);
 
             var newModulePrefab = GenerationShared.GetRandomWithTag(_componentModules, newTag);
-            var moduleObject = Instantiate(newModulePrefab);
+            var moduleObject = Instantiate(newModulePrefab, roomModule.transform);
             var newModule = moduleObject.GetComponent<Module>();
 
             var connectorToMatch = newModule.GetConnectors().FirstOrDefault(x => x.IsDefault);

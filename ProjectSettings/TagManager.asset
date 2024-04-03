@@ -22,6 +22,7 @@ TagManager:
   - Exit
   - Component
   - Wall
+  - Shroud
   layers:
   - Default
   - TransparentFX
@@ -50,7 +51,7 @@ TagManager:
   - Point&Click
   - Dynamic Split Screen
   - Transparent Mesh
-  - 
+  - Shroud
   - 
   - 
   - 

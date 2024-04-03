@@ -127,7 +127,7 @@ namespace Presenter.Generation
             
             var newModulePrefab = GenerationShared.GetRandomWithTag(modules, newTag);
             var moduleObject = Instantiate(newModulePrefab);
-            var newModule = moduleObject.GetComponent<Module>();
+            var newModule = moduleObject.GetComponent<Module>();            
 
             var newModuleExits = newModule.GetExitConnectors();
             var exitToMatch = newModuleExits.FirstOrDefault(x => x.IsDefault) ?? RandomizationUtil.GetRandom(newModuleExits);
@@ -135,8 +135,11 @@ namespace Presenter.Generation
             
             Physics.SyncTransforms();
 
-            if (slowGenerateSeconds > 0) { yield return new WaitForSeconds(slowGenerateSeconds); }
-            newModule.GetComponent<OverlapBox>().DetectCollisions();
+            //Creating a bounds for overlapbox and a box collider around the whole module
+            newModule.Bounds = CalcBounds(newModule.gameObject, LayerMask.NameToLayer("Default"));            
+
+            if (slowGenerateSeconds > 0) { yield return new WaitForSeconds(slowGenerateSeconds); }            
+            newModule.GetComponent<OverlapBox>().DetectCollisions(newModule.Bounds);           
 
             if (!newModule.Colliding)
             {
@@ -147,6 +150,16 @@ namespace Presenter.Generation
 
                 pendingExit.IsConnected = true;
                 exitToMatch.IsConnected = true;
+
+                var collisionTransform = newModule.transform.Find("Collision");
+                if (collisionTransform != null && collisionTransform.TryGetComponent(out BoxCollider collider))
+                {
+                    collisionTransform.position = newModule.Bounds.center;
+                    collisionTransform.localRotation = newModule.transform.localRotation;
+                    collider.center = Vector3.zero;
+                    collider.size = Vector3.Scale(newModule.Bounds.size, gameObject.transform.localScale.reciprocal());
+                    collider.isTrigger = true;
+                }                
 
                 newExits.AddRange(newModuleExits.Where(e => e != exitToMatch));
 
@@ -207,6 +220,20 @@ namespace Presenter.Generation
             yield return null;
         }
 
+        private Bounds CalcBounds(GameObject obj, LayerMask layerMask)
+        {
+            var bounds = obj.GetComponent<Renderer>().bounds;
+            foreach (Transform child in obj.transform)
+            {
+                if (child.gameObject.layer == layerMask && child.gameObject.TryGetComponent(out Renderer renderer))
+                {
+                    bounds.Encapsulate(renderer.bounds);
+                }
+            }
+
+            return bounds;
+        }
+
         private void DeleteAll()
         {
             foreach (ModuleConnector m in FindObjectsOfType<ModuleConnector>())
@@ -218,6 +245,14 @@ namespace Presenter.Generation
             {
                 Destroy(m.gameObject);
             }
+        }
+    }
+
+    public static class Vector3Ext
+    {
+        public static Vector3 reciprocal(this Vector3 input)
+        {
+            return new Vector3(1f / input.x, 1f / input.y, 1f / input.z);
         }
     }
 }

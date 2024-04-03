@@ -17,16 +17,16 @@ namespace Utility
             bounds = gameObject.GetComponent<Renderer>().bounds;
             foreach (Transform child in gameObject.transform)
             {
-                if (child.gameObject.TryGetComponent(out Renderer renderer))
+                if (child.gameObject.layer == layerMask && child.gameObject.TryGetComponent(out Renderer renderer))
                 {
                     bounds.Encapsulate(renderer.bounds);
                 }
             }
         }
 
-        public void DetectCollisions()
+        public void DetectCollisions(Bounds bounds)
         {
-            CalcBounds();
+            //CalcBounds();
 
             Collider[] hitColliders = Physics.OverlapBox(bounds.center, bounds.extents - bounds.extents.normalized, Quaternion.identity, layerMask);
             int i = 0;
